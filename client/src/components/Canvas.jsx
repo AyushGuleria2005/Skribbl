@@ -26,11 +26,7 @@ const Canvas = (props) => {
     ) {
       ctx.beginPath();
       ctx.moveTo(startPosX.current, startPosY.current);
-      ctx.lineTo(endPosX.current, endPosY.current);
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 5;
-      ctx.stroke();
+      // ctx.lineTo(posX.current, posY.current);
     }
   }, [isDrawing]);
   return (
@@ -41,22 +37,30 @@ const Canvas = (props) => {
         onMouseMove={(e) => {
           posX.current = e.clientX;
           posY.current = e.clientY;
-
+          const ctx = ref.current.getContext("2d");
+          if (isDrawing) {
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 5;
+            ctx.lineTo(posX.current, posY.current);
+            ctx.stroke();
+          }
         }}
         onMouseDown={() => {
           // console.log("Point clicked is: "+posX+" and "+posY);
           startPosX.current = posX.current;
           startPosY.current = posY.current;
           setIsDrawing(true);
-          // console.log(startPosX.current);
-          // console.log(startPosY.current);
+          console.log("start X: " + startPosX.current);
+          console.log("start Y: " + startPosY.current);
         }}
         onMouseUp={() => {
           // console.log("Point released is: "+posX+" and "+posY);
           endPosX.current = posX.current;
           endPosY.current = posY.current;
-          console.log(endPosX.current);
-          console.log(endPosY.current);
+          console.log("end X: " + endPosX.current);
+          console.log("end Y: " + endPosY.current);
           setIsDrawing(false);
         }}
       />
