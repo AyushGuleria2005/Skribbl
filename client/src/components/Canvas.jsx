@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
+import {io} from "socket.io-client"
 
 const Canvas = (props) => {
+  const socket = io("http://localhost:7777");
   //Selecting the canvas element
   const ref = useRef();
   const [isDrawing, setIsDrawing] = useState(false);
@@ -25,7 +27,7 @@ const Canvas = (props) => {
       endPosY.current !== null
     ) {
       ctx.beginPath();
-      ctx.moveTo(startPosX.current, startPosY.current);
+      
       // ctx.lineTo(posX.current, posY.current);
     }
   }, [isDrawing]);
