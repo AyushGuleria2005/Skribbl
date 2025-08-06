@@ -19,6 +19,10 @@ const io = new Server(server,{
 
 io.on("connection",(socket)=>{
     console.log(`Message from id ${socket.id}`);
+    socket.on("drawing",(obj)=>{
+        // console.log(obj)
+        console.log(obj.x,obj.y);
+    })
 })
 
 app.use("/",(req,res)=>{

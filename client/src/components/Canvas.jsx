@@ -1,22 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {io} from "socket.io-client"
 
 const Canvas = (props) => {
-  const socket = io("http://localhost:7777");
+  
+  const socket = useMemo(()=>io("http://localhost:7777"),[]);
+
   //Selecting the canvas element
-  const ref = useRef();
-  const [isDrawing, setIsDrawing] = useState(false);
+  const refCanvas = useRef();
+
+  const [isDrawing, setIsDrawing] = useState(false);  // Responsible for state change of canvas
   // const [posX,setPosX] = useState(null);
   // const [posY,setPosY] = useState(null);
   const posX = useRef(null);
   const posY = useRef(null);
+
   const startPosX = useRef(null);
   const startPosY = useRef(null);
+
   const endPosX = useRef(null);
   const endPosY = useRef(null);
-
+  
   useEffect(() => {
-    const canvas = ref.current;
+    const canvas = refCanvas.current;
     //Creating context i.e pencil to draw
     const ctx = canvas.getContext("2d");
     //Let's draw
@@ -27,19 +32,23 @@ const Canvas = (props) => {
       endPosY.current !== null
     ) {
       ctx.beginPath();
-      
+      socket.emit("drawing",{"x":posX.current,"y":posY.current});
       // ctx.lineTo(posX.current, posY.current);
     }
   }, [isDrawing]);
+
+
   return (
     <div>
       <canvas
-        ref={ref}
+        ref={refCanvas}
         {...props}
+
+        
         onMouseMove={(e) => {
           posX.current = e.clientX;
           posY.current = e.clientY;
-          const ctx = ref.current.getContext("2d");
+          const ctx = refCanvas.current.getContext("2d");
           if (isDrawing) {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
@@ -49,6 +58,8 @@ const Canvas = (props) => {
             ctx.stroke();
           }
         }}
+
+
         onMouseDown={() => {
           // console.log("Point clicked is: "+posX+" and "+posY);
           startPosX.current = posX.current;
@@ -57,6 +68,8 @@ const Canvas = (props) => {
           console.log("start X: " + startPosX.current);
           console.log("start Y: " + startPosY.current);
         }}
+
+
         onMouseUp={() => {
           // console.log("Point released is: "+posX+" and "+posY);
           endPosX.current = posX.current;
@@ -72,8 +85,4 @@ const Canvas = (props) => {
 
 export default Canvas;
 
-// Click krne ke baad and hold that click ke baad we can only then use mousemove
 
-//mousedown => click
-//mousemove=> move my mouse
-//mouseup => when i release my click
