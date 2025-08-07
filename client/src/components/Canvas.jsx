@@ -1,81 +1,50 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {io} from "socket.io-client"
+import React, { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
 
 const Canvas = (props) => {
-  
-  const socket = useMemo(()=>io("http://localhost:7777"),[]);
-
-  //Selecting the canvas element
-  const refCanvas = useRef();
-
-  const [isDrawing, setIsDrawing] = useState(false);  // Responsible for state change of canvas
-  // const [posX,setPosX] = useState(null);
-  // const [posY,setPosY] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef();
   const posX = useRef(null);
   const posY = useRef(null);
-
-  const startPosX = useRef(null);
-  const startPosY = useRef(null);
-
-  const endPosX = useRef(null);
-  const endPosY = useRef(null);
-  
+  const socketRef = useRef();
   useEffect(() => {
-    const canvas = refCanvas.current;
-    //Creating context i.e pencil to draw
-    const ctx = canvas.getContext("2d");
-    //Let's draw
-    if (
-      startPosX.current !== null &&
-      startPosY.current !== null &&
-      endPosX.current !== null &&
-      endPosY.current !== null
-    ) {
-      ctx.beginPath();
-      socket.emit("drawing",{"x":posX.current,"y":posY.current});
-      // ctx.lineTo(posX.current, posY.current);
-    }
-  }, [isDrawing]);
+    socketRef.current = io("http://localhost:7777");
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
+    console.log("State change: isDrawing =" + isDrawing);
 
+    
 
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
   return (
     <div>
       <canvas
-        ref={refCanvas}
+        ref={canvasRef}
         {...props}
-
-        
         onMouseMove={(e) => {
-          posX.current = e.clientX;
-          posY.current = e.clientY;
-          const ctx = refCanvas.current.getContext("2d");
           if (isDrawing) {
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 5;
+            const ctx = canvasRef.current.getContext("2d");
+            posX.current = e.clientX;
+            posY.current = e.clientY;
             ctx.lineTo(posX.current, posY.current);
             ctx.stroke();
+            socketRef.current.emit("drawing",{"posX":posX.current,"posY":posY.current});
           }
         }}
-
-
-        onMouseDown={() => {
-          // console.log("Point clicked is: "+posX+" and "+posY);
-          startPosX.current = posX.current;
-          startPosY.current = posY.current;
+        onMouseDown={(e) => {
+          const ctx = canvasRef.current.getContext("2d");
+          ctx.beginPath();
+          ctx.moveTo(e.clientX, e.clientY);
           setIsDrawing(true);
-          console.log("start X: " + startPosX.current);
-          console.log("start Y: " + startPosY.current);
         }}
-
-
         onMouseUp={() => {
-          // console.log("Point released is: "+posX+" and "+posY);
-          endPosX.current = posX.current;
-          endPosY.current = posY.current;
-          console.log("end X: " + endPosX.current);
-          console.log("end Y: " + endPosY.current);
+          console.log("Mouse up");
           setIsDrawing(false);
         }}
       />
@@ -84,5 +53,3 @@ const Canvas = (props) => {
 };
 
 export default Canvas;
-
-
