@@ -19,9 +19,10 @@ const io = new Server(server,{
 
 io.on("connection",(socket)=>{
     console.log(`Message from id ${socket.id}`);
-    socket.on("drawing",(obj)=>{
+    socket.on("drawing-server",(obj)=>{
         const {posX,posY} = obj;
-        console.log(posX,posY);
+        // console.log(posX,posY);
+        socket.broadcast.emit("drawing-client",obj)
     })
     socket.on("disconnect",()=>{
         console.log("Canvas Disconnected: "+socket.id);

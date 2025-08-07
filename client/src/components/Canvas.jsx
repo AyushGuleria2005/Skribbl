@@ -6,18 +6,25 @@ const Canvas = (props) => {
   const canvasRef = useRef();
   const posX = useRef(null);
   const posY = useRef(null);
+  const startX = useRef(null);
+  const startY = useRef(null);
   const socketRef = useRef();
   useEffect(() => {
     socketRef.current = io("http://localhost:7777");
     const ctx = canvasRef.current.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "red";
     ctx.lineWidth = 3;
     console.log("State change: isDrawing =" + isDrawing);
-
-    
-
+    socketRef.current.on("drawing-client", (object) => {
+      const {posX,posY,startX,startY} = object;
+      ctx.beginPath();
+      ctx.moveTo(startX,startY);
+      ctx.lineTo(posX,posY);
+      ctx.stroke();
+      console.log(posX,posY)
+    });
     return () => {
       socketRef.current.disconnect();
     };
@@ -34,17 +41,24 @@ const Canvas = (props) => {
             posY.current = e.clientY;
             ctx.lineTo(posX.current, posY.current);
             ctx.stroke();
-            socketRef.current.emit("drawing",{"posX":posX.current,"posY":posY.current});
+            socketRef.current.emit("drawing-server", {
+              posX: posX.current,
+              posY: posY.current,
+              startX:startX.current,
+              startY:startY.current
+            });
           }
         }}
         onMouseDown={(e) => {
           const ctx = canvasRef.current.getContext("2d");
           ctx.beginPath();
+          startX.current = e.clientX;
+          startY.current = e.clientY;
           ctx.moveTo(e.clientX, e.clientY);
+
           setIsDrawing(true);
         }}
         onMouseUp={() => {
-          console.log("Mouse up");
           setIsDrawing(false);
         }}
       />
