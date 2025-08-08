@@ -23,10 +23,10 @@ const Canvas = (props) => {
     ctx.lineWidth = 1;
     console.log("State change: isDrawing =" + isDrawing);
     socketRef.current.on("drawing-client", (object) => {
-      const { posX, posY,isDraw,newX,newY} = object;
-      console.log("end points: "+endX.current, endY.current);
-      console.log("pos: "+posX, posY);
-      console.log("new point: "+newX, newY);
+      const { posX, posY, isDraw } = object;
+      console.log("end points: " + endX.current, endY.current);
+      console.log("pos: " + posX, posY);
+      // console.log("new point: "+newX, newY);
       console.log(isDraw);
       if (endX.current !== null && endY.current !== null) {
         ctx.beginPath();
@@ -34,12 +34,12 @@ const Canvas = (props) => {
         ctx.lineTo(posX, posY);
         ctx.stroke();
       }
-      endX.current = newX;
-      endY.current = newY;
-      if(!isDraw){
-        endX.current = newX;
-        endY.current = newY;
-
+      if (isDraw) {
+        endX.current = posX;
+        endY.current = posY;
+      } else {
+        endX.current = null;
+        endY.current = null;
       }
     });
     return () => {
@@ -52,9 +52,9 @@ const Canvas = (props) => {
         ref={canvasRef}
         {...props}
         onMouseMove={(e) => {
-          newX.current = e.clientX
-          newY.current = e.clientY
-          console.log(newX.current,newY.current);
+          newX.current = e.clientX;
+          newY.current = e.clientY;
+          // console.log(newX.current, newY.current);
           if (isDrawing) {
             const ctx = canvasRef.current.getContext("2d");
             posX.current = e.clientX;
@@ -64,9 +64,7 @@ const Canvas = (props) => {
             socketRef.current.emit("drawing-server", {
               posX: posX.current,
               posY: posY.current,
-              newX: newX.current,
-              newY: newY.current,
-              isDraw: drawingCheck.current
+              isDraw: drawingCheck.current,
             });
           }
         }}
@@ -81,6 +79,9 @@ const Canvas = (props) => {
         }}
         onMouseUp={() => {
           drawingCheck.current = false;
+          socketRef.current.emit("drawing-server", {
+            isDraw: drawingCheck.current,
+          });
           setIsDrawing(false);
         }}
       />
