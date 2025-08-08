@@ -8,22 +8,39 @@ const Canvas = (props) => {
   const posY = useRef(null);
   const startX = useRef(null);
   const startY = useRef(null);
+  const endX = useRef(null);
+  const endY = useRef(null);
+  const newX = useRef(null);
+  const newY = useRef(null);
+  const drawingCheck = useRef(false);
   const socketRef = useRef();
   useEffect(() => {
     socketRef.current = io("http://localhost:7777");
     const ctx = canvasRef.current.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
     console.log("State change: isDrawing =" + isDrawing);
     socketRef.current.on("drawing-client", (object) => {
-      const {posX,posY,startX,startY} = object;
-      ctx.beginPath();
-      ctx.moveTo(startX,startY);
-      ctx.lineTo(posX,posY);
-      ctx.stroke();
-      console.log(posX,posY)
+      const { posX, posY,isDraw,newX,newY} = object;
+      console.log("end points: "+endX.current, endY.current);
+      console.log("pos: "+posX, posY);
+      console.log("new point: "+newX, newY);
+      console.log(isDraw);
+      if (endX.current !== null && endY.current !== null) {
+        ctx.beginPath();
+        ctx.moveTo(endX.current, endY.current);
+        ctx.lineTo(posX, posY);
+        ctx.stroke();
+      }
+      endX.current = newX;
+      endY.current = newY;
+      if(!isDraw){
+        endX.current = newX;
+        endY.current = newY;
+
+      }
     });
     return () => {
       socketRef.current.disconnect();
@@ -35,6 +52,9 @@ const Canvas = (props) => {
         ref={canvasRef}
         {...props}
         onMouseMove={(e) => {
+          newX.current = e.clientX
+          newY.current = e.clientY
+          console.log(newX.current,newY.current);
           if (isDrawing) {
             const ctx = canvasRef.current.getContext("2d");
             posX.current = e.clientX;
@@ -44,8 +64,9 @@ const Canvas = (props) => {
             socketRef.current.emit("drawing-server", {
               posX: posX.current,
               posY: posY.current,
-              startX:startX.current,
-              startY:startY.current
+              newX: newX.current,
+              newY: newY.current,
+              isDraw: drawingCheck.current
             });
           }
         }}
@@ -55,10 +76,11 @@ const Canvas = (props) => {
           startX.current = e.clientX;
           startY.current = e.clientY;
           ctx.moveTo(e.clientX, e.clientY);
-
+          drawingCheck.current = true;
           setIsDrawing(true);
         }}
         onMouseUp={() => {
+          drawingCheck.current = false;
           setIsDrawing(false);
         }}
       />

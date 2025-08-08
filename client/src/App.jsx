@@ -4,7 +4,7 @@ import Canvas from './components/Canvas'
 const App = () => {
   return (
     <div>
-      <Canvas width="500" height="600" style={{background:'lightblue',border:'2px solid black'}} />
+      <Canvas width="600" height="300" style={{background:'black',border:'2px solid black'}} />
     </div>
   )
 }
