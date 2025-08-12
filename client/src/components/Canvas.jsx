@@ -15,12 +15,12 @@ const Canvas = (props) => {
   const drawingCheck = useRef(false);
   const socketRef = useRef();
   useEffect(() => {
-    socketRef.current = io("http://localhost:7777");
+    socketRef.current = io("https://skribbl-d18d.onrender.com");
     const ctx = canvasRef.current.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 8;
     console.log("State change: isDrawing =" + isDrawing);
     socketRef.current.on("drawing-client", (object) => {
       const { posX, posY, isDraw } = object;
