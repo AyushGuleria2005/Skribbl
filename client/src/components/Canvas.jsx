@@ -15,7 +15,7 @@ const Canvas = (props) => {
   const drawingCheck = useRef(false);
   const socketRef = useRef();
   useEffect(() => {
-    socketRef.current = io("https://skribbl-d18d.onrender.com");
+    socketRef.current = io("http://localhost:7777");
     const ctx = canvasRef.current.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
