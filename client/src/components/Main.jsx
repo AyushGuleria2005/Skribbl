@@ -1,44 +1,43 @@
 import React, { useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { Link } from "react-router-dom";
 
 const Main = () => {
   const [roomCode, setRoomCode] = useState("ABCDEF");
   const socketRef = useRef();
   const participantSocketRef = useRef();
-  const [hostId,setHostId] = useState("");
-  const [inputRoom,setInputRoom] = useState("");
+  const [hostId, setHostId] = useState("");
+  const [inputRoom, setInputRoom] = useState("");
 
   const generateCode = () => {
     const random = Math.floor(Math.random() * 1000000);
     setRoomCode(random);
-    socketRef.current = io("http://localhost:7777");
+    socketRef.current = io("https://skribbl-d18d.onrender.com");
     setHostId(socketRef.current.id);
-    createRoom(random);   // call this function to create a room with the generated room ID
+    createRoom(random); // call this function to create a room with the generated room ID
   };
 
   const createRoom = (code) => {
     // Send join-room event to the server
-    socketRef.current.emit("join-room-host",code)
-  }
-  
+    socketRef.current.emit("join-room-host", code);
+  };
 
   const joinHost = () => {
-    if(roomCode === "ABCDEF"){
-      console.log("Generate the code first")
-    }
-    else{
+    if (roomCode === "ABCDEF") {
+      console.log("Generate the code first");
+    } else {
       console.log("Join the host");
-      socketRef.current.emit("join-room",roomCode);
+      socketRef.current.emit("join-room", roomCode);
     }
-  }
+  };
 
   const joinRoom = () => {
-    participantSocketRef.current = io("http://localhost:7777");
-    participantSocketRef.current.on("connect",()=>{
-      console.log("Hello "+participantSocketRef.current.id)
+    participantSocketRef.current = io("https://skribbl-d18d.onrender.com");
+    participantSocketRef.current.on("connect", () => {
+      console.log("Hello " + participantSocketRef.current.id);
     });
-    participantSocketRef.current.emit("join-room-participant",inputRoom);
-  }
+    participantSocketRef.current.emit("join-room-participant", inputRoom);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-gray-900 flex flex-col items-center justify-center p-6">
@@ -59,7 +58,6 @@ const Main = () => {
 
       {/* Cards Section */}
       <div className="flex flex-col lg:flex-row gap-8 w-full max-w-4xl">
-
         {/* Host Session Card */}
         <div className="bg-gray-800/90 backdrop-blur border border-gray-700 rounded-2xl p-8 flex-1 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group">
           <div className="flex flex-col items-center text-center h-full justify-between min-h-[300px]">
@@ -84,7 +82,12 @@ const Main = () => {
               >
                 {roomCode}
               </span>
-              <span onClick={joinHost}> 🚀</span>
+              <Link to="/canvas">
+                <span onClick={joinHost} className="cursor-pointer">
+                  {" "}
+                  🚀
+                </span>
+              </Link>
             </div>
             <button
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 w-full transform hover:scale-105"
@@ -96,8 +99,6 @@ const Main = () => {
             </button>
           </div>
         </div>
-
-
 
         {/* Join Session Card */}
         <div className="bg-gray-800/90 backdrop-blur border border-gray-700 rounded-2xl p-8 flex-1 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 group">
@@ -117,14 +118,19 @@ const Main = () => {
                 placeholder="🔑 Enter room code..."
                 className="w-full bg-gray-700/80 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 mb-6 transition-all duration-300"
                 value={inputRoom}
-                onChange={(e)=>{
-                  setInputRoom(e.target.value)
+                onChange={(e) => {
+                  setInputRoom(e.target.value);
                 }}
               />
             </div>
-            <button className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 w-full transform hover:scale-105" onClick={joinRoom}>
-              🎯 Join Room
-            </button>
+            <Link to='/canvas'>
+              <button
+                className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 w-full transform hover:scale-105"
+                onClick={joinRoom}
+              >
+                🎯 Join Room
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -133,5 +139,3 @@ const Main = () => {
 };
 
 export default Main;
-
-
